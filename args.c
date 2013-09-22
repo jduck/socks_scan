@@ -96,7 +96,7 @@ parse_args(c, v, tlist)
 	     break;
 	   case 's':
 	     tl = strtoul(optarg, &p, 0);
-	     if (*p || p == optarg || tl < 1 || tl > 100)
+	     if (*p || p == optarg || tl < 1 || tl > 300)
 	       {
 		  fprintf(stderr, "-%c: invalid slot count value: %s\n", ch, optarg);
 		  return -1;
