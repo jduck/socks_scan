@@ -1,2 +1,4 @@
 *.o
 no_dist
+socks_scan
+
