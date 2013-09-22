@@ -91,7 +91,7 @@ main(c, v)
 	fprintf(stderr, "targets:\n");
 	for (t = targets; t; t = t->next)
 	  {
-	     fprintf(stderr, "%-19s", inet_ntoa(t->ip));
+	     fprintf(stderr, "%-19s:%u", inet_ntoa(t->ip), t->port);
 	     if (col > 0 && (col % 3) == 0)
 	       {
 		  fprintf(stderr, "\n");
@@ -576,7 +576,7 @@ init_slot(sl, targets, ebuf, el)
 	sl->targ->state |= SPSS_STARTED;
 	/* initialize the nsock_tcp* data */
 	sl->nst.tin.sin_addr = sl->targ->ip;
-	sl->nst.tin.sin_port = htons(SOCKS_PORT);
+	sl->nst.tin.sin_port = htons(sl->targ->port);
 	sl->nst.tin.sin_family = AF_INET;
 	sl->nst.opt = NSTCP_NON_BLOCK;
 	sl->nst.ebuf = ebuf;

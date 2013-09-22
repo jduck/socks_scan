@@ -38,6 +38,7 @@ typedef struct __target_stru
 {
    struct __target_stru *next;
    struct in_addr ip;
+   unsigned short port;
    unsigned long state;
 } targlist_t;
 

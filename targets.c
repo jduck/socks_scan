@@ -19,7 +19,7 @@
 #include "nsock_resolve.h"
 
 // static void free_target(targlist_t **);
-static int add_target_ip(targlist_t **, unsigned long);
+static int add_target_ip(targlist_t **, unsigned long, unsigned short);
 static int find_in_list(targlist_t **, targlist_t **, unsigned long);
 
 /*
@@ -77,10 +77,19 @@ add_target(tl, targ)
    char *targ;
 {
    struct in_addr ip;
+   unsigned short port = SOCKS_PORT;
    unsigned int ntargs = 0;
+   char *pport;
    
    if (options.verbose >= 3)
      fprintf(stderr, "add_targ(tl, \"%s\");\n", targ);
+
+   /* see if there is a port number in it */
+   pport = strrchr(targ, ':');
+   if (pport) {
+       *pport++ = '\0';
+       port = atoi(pport);
+   }
 
    /* what kind of target did we get? */
    if (strchr(targ, '/'))
@@ -129,7 +138,7 @@ add_target(tl, targ)
 	     tul = (ip.s_addr & 0xff000000) >> 24;
 	     if (tul == 0 || tul == 255)
 	       continue;
-	     ntargs += add_target_ip(tl, (unsigned long)ip.s_addr);
+	     ntargs += add_target_ip(tl, (unsigned long)ip.s_addr, port);
 	  }
      }
    else
@@ -146,10 +155,10 @@ add_target(tl, targ)
 		  return 0;
 	       }
 	     for (i = 0; hp->h_addr_list[i]; i++)
-	       ntargs += add_target_ip(tl, *(unsigned long *)hp->h_addr_list[i]);
+	       ntargs += add_target_ip(tl, *(unsigned long *)hp->h_addr_list[i], port);
 	  }
 	else
-	  ntargs += add_target_ip(tl, (unsigned long)ip.s_addr);
+	  ntargs += add_target_ip(tl, (unsigned long)ip.s_addr, port);
      }
    return ntargs;
 }
@@ -174,16 +183,17 @@ free_target(tl)
  * add a target ip to the list of ips to attack
  */
 static int
-add_target_ip(tl, ip)
+add_target_ip(tl, ip, port)
    targlist_t **tl;
    unsigned long ip;
+   unsigned short port;
 {
    targlist_t *t, *tt = (targlist_t *)0;
    struct in_addr ipn;
    
    ipn.s_addr = ip;
    if (options.verbose >= 4)
-     fprintf(stderr, "add_target_ip(tl, %s)\n", inet_ntoa(ipn));
+     fprintf(stderr, "add_target_ip(tl, %s, %u)\n", inet_ntoa(ipn), port);
    
    /* is it in the list already? */
    if (find_in_list(tl, &tt, ip))
@@ -200,6 +210,7 @@ add_target_ip(tl, ip)
 	return 0;
      }
    t->ip.s_addr = ip;
+   t->port = port;
    /* if tt is non-null then we have a nice indicator of where to link it. */
    if (tt)
      {
